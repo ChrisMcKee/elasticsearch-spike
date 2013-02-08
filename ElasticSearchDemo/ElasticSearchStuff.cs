@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Configuration;
 	using System.Text;
 	using Nest;
 	using Nest.FactoryDsl;
@@ -14,7 +15,7 @@
 		public static IElasticClient ElasticSearchClient;
 
 		public static Guid EmployeeId;
-		private static readonly ConnectionSettings ElasticSearchConnectionString = new ConnectionSettings("localhost", 9200);
+		private static readonly ConnectionSettings ElasticSearchConnectionString = new ConnectionSettings(ConfigurationManager.AppSettings.Get("ElasticSearchIP"), Convert.ToInt32(ConfigurationManager.AppSettings.Get("ElasticSearchPort")));
 
 		public static void GetEmployeesWithFacets()
 		{
@@ -170,7 +171,7 @@
 
 			if (!status.Success)
 			{
-				Log(string.Format("Connection Status: {0}", status.Result));
+				Log(string.Format("Connection Status: Connection Couldn't Be Made, {0}", status.Error.ExceptionMessage));
 				Console.WriteLine("Any Key To Continue");
 				Console.ReadLine();
 			}

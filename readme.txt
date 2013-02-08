@@ -1,8 +1,9 @@
 *Generic(ish) Test Setup for Elasticsearch*
 
-Connection string for elasticsearch is set in ElasticSearchStuff.cs 
-- ConnectionSettings("localhost", 9200);
+First setup elasticsearch (unzip to folder; go to bin/elasticsearch.bat)
+Connection string for elasticsearch is set in App.config, if running locally the defaults should just work.
 
-uses Index of employees
-and  Type  of employee 
+Uses Index of employees
+And  Type  of employee 
 
+Seed data is just random crap.

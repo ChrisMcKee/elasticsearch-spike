@@ -18,6 +18,8 @@
 
 		private static void Main(string[] args)
 		{
+			ElasticSearchStuff.RemoveEmployeesIndex();
+
 			Console.WriteLine("1 - Index employees without explicitly creating index");
 			var stopwatch = Stopwatch.StartNew();
 			ElasticSearchStuff.SetUpElasticSearch();

@@ -2,7 +2,6 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Linq;
 	using System.Text;
 	using Nest;
 	using Nest.FactoryDsl;
@@ -39,37 +38,44 @@
 			employee.FavoriteNumbers.Add(22);
 
 			ElasticSearchClient.Update(u => u
-				                                .Object(employee)
-				                                .Script("ctx._source = myobj")
-				                                .Params(p => p.Add("myobj", employee))
-				                                .Index(IndexName)
-				                                .Type(TypeName)
-				                                .Id(employee.Id.ToString())
-				                                .RetriesOnConflict(5)
-				                                .Refresh());
+				                            .Object(employee)
+				                            .Script("ctx._source = myobj")
+				                            .Params(p => p.Add("myobj", employee))
+				                            .Index(IndexName)
+				                            .Type(TypeName)
+				                            .Id(employee.Id.ToString())
+				                            .RetriesOnConflict(5)
+				                            .Refresh());
 
 			Log("Updated employee with new favorite number");
 		}
 
+		/*
+		 * If you have a column full of guids it would make sense to strip the hyphen
+		 * as there is a well known issue with elastic search and hyphens
+		 * searching for a standard stored guid in whole wont produce any results
+		 * searching for part of the guid (before a -) will produce results
+		 */
 		public static void FilterEmployeesByCompanyId()
 		{
 			var searchBuilder = SearchBuilder.Builder();
-			searchBuilder.Filter(FilterFactory.TermFilter("companyId", "ef6eacbd-1a8d-4847-a6b4-b6ea38b02d0c".ToLower()));
+			searchBuilder.Filter(FilterFactory.TermFilter("companyId", "ef6eacbd"));
 
-			var result = ElasticSearchClient.Search(searchBuilder, IndexName, TypeName);
+			var result = ElasticSearchClient.Search(searchBuilder, IndexName);
 
-			Log(string.Format("Employees in Company Id Starting 'ef6eacbd' :{0} (Took: {1})", result.Total, result.ElapsedMilliseconds));
+			Log(string.Format("Employees in Company Id Starting 'ef6eacbd' : {0} (Time (ms): {1})", result.Total,
+			                  result.ElapsedMilliseconds));
 		}
 
 		public static void SearchEmployeesByDescriptionText(int size)
 		{
 			var searchBuilder = SearchBuilder.Builder();
-			searchBuilder.Query(QueryFactory.TextQuery("description", "urna eget risus")).Size(size);
+			searchBuilder.Query(QueryFactory.TextQuery("description", "overworked")).Size(size);
 
 			var result = ElasticSearchClient.Search(searchBuilder, IndexName, TypeName);
 
 			Console.ForegroundColor = ConsoleColor.Green;
-			Log("Employees whose Description is closest to 'urna eget risus':");
+			Log("Employees whose Description is closest to 'overworked':");
 
 			result.Hits.Hits.ForEach(h => Log(string.Format("Score: {0}", h.Score.ToString())));
 			Console.ForegroundColor = ConsoleColor.White;
@@ -116,9 +122,9 @@
 
 				for (int j = 0; j < 10; j++)
 				{
-					description.Append(
-						string.Join(
-							ElasticSearchTestSeed.TestDescriptions[rnd.Next(ElasticSearchTestSeed.TestDescriptions.GetUpperBound(0))], " "));
+					int index = rnd.Next(ElasticSearchTestSeed.TestDescriptionSeedTags.GetUpperBound(0));
+					description.Append(ElasticSearchTestSeed.TestDescriptionSeedTags[index]);
+					if (i > 0) description.Append(" ");
 				}
 
 				var employee = new Employee
@@ -189,8 +195,15 @@
 
 		public static void RemoveEmployeesIndex()
 		{
-			ElasticSearchClient.DeleteIndex(IndexName);
-			Log("Deleted employees index", true);
+			try
+			{
+				ElasticSearchClient.DeleteIndex(IndexName);
+				Log("Deleted employees index", true);
+			}
+			catch
+			{
+				// for this crappy app we can ignore this; I'm basically being lazy
+			}
 		}
 
 		public static void Log(string message, bool delete = false)

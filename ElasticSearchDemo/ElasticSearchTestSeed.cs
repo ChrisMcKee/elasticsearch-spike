@@ -62,11 +62,9 @@
 			                                                };
 
 
-		public static readonly string[] TestDescriptions = new[]
+		public static readonly string[] TestDescriptionSeedTags = new[]
 			                                                   {
-				                                                   "cras", "tincidunt", "urna", "eget", "risus", "tincidunt", "a",
-				                                                   "convallis", "nulla", "pharetra", "nam", "the", "sed", "sapien",
-				                                                   "posuere", "congue", "laoreet", "non", "ac", "nisi"
+				                                                   "Alcoholic", "Overworked", "Underpaid", "Driver", "Admin", "Pale"
 			                                                   };
 
 		public static readonly Guid[] CompanyIds = new[]
